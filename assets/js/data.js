@@ -67,6 +67,15 @@ window.SITE = {
     }
   ],
 
+  // "How I work" steps, shown in order on the scrolling track.
+  process: [
+    { title: 'Research the account', text: 'Who they are, what they run in the lab, and who decides. Before anyone gets a message.' },
+    { title: 'Reach out with a reason', text: 'Outreach written for their workflow, with one clear reason to talk now.' },
+    { title: 'Listen first', text: 'The first meeting is for questions: workflows, budget, samples, timing. Not a pitch.' },
+    { title: 'Keep the pipeline honest', text: 'HubSpot stages that reflect what is actually true about each deal.' },
+    { title: 'Look after the client', text: 'Once they sign, quick answers and steady follow-through keep them coming back.' }
+  ],
+
   certifications: [
     { name: 'Frictionless Sales', issuer: 'HubSpot Academy', date: '2026-06' },
     { name: 'Inbound', issuer: 'HubSpot Academy', date: '2026-06' },

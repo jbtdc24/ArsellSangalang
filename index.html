@@ -13,16 +13,20 @@
 <meta name="theme-color" content="#EEF1F4">
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/Lora-Variable.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=1">
+<link rel="stylesheet" href="/assets/css/style.css?v=2">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
+<canvas id="bg" aria-hidden="true"></canvas>
+<div class="cursor" id="cursor" aria-hidden="true"><i></i></div>
+<div class="progress" id="progress" aria-hidden="true"></div>
 
 <header class="top">
   <a class="mark" href="#top" aria-label="Back to top">Arsell Sangalang</a>
   <nav aria-label="Sections">
     <a href="#experience">Experience</a>
     <a href="#strengths">What I do</a>
+    <a href="#process">How I work</a>
     <a href="#certs">Certifications</a>
     <a href="#contact" class="nav-cta">Contact</a>
   </nav>
@@ -62,6 +66,19 @@
     <div class="strengths" id="strength-list"></div>
   </section>
 
+  <section class="flow" id="process" aria-labelledby="proc-h">
+    <div class="flow-sticky">
+      <div class="block-head flow-head">
+        <h2 id="proc-h">How I work</h2>
+        <p class="block-sub">From the first bit of research to a client who stays.</p>
+      </div>
+      <div class="flow-track-wrap">
+        <div class="flow-line"><i id="flow-fill"></i><b id="flow-drop"></b></div>
+        <ol class="flow-track" id="flow-track"></ol>
+      </div>
+    </div>
+  </section>
+
   <section class="block" id="certs" aria-labelledby="cert-h">
     <div class="block-head">
       <h2 id="cert-h">Certifications</h2>
@@ -71,6 +88,7 @@
   </section>
 
   <section class="contact" id="contact" aria-labelledby="contact-h">
+    <canvas class="contact-fx" id="contact-fx" aria-hidden="true"></canvas>
     <h2 id="contact-h">Working on something in life science?</h2>
     <p>I’m happy to talk about client services, sales development or HubSpot. The quickest way to reach me is a message on LinkedIn.</p>
     <div class="hero-actions" id="contact-actions">
@@ -84,7 +102,8 @@
   <a href="#top">Back to top</a>
 </footer>
 
-<script src="/assets/js/data.js?v=1"></script>
-<script src="/assets/js/site.js?v=1"></script>
+<script src="/assets/js/data.js?v=2"></script>
+<script src="/assets/js/site.js?v=2"></script>
+<script src="/assets/js/fx.js?v=2"></script>
 </body>
 </html>

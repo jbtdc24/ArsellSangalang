@@ -34,16 +34,11 @@
   }
 
   /* ---------- 96-well plate ---------- */
-  // Initials drawn on rows B–G. "#" = filled well.
-  var ART = [
-    '............',
-    '..###...###.',
-    '.#...#.#....',
-    '.#...#.#....',
-    '.#####..##..',
-    '.#...#....#.',
-    '.#...#.###..',
-    '............'
+  // Patterns the plate cycles through. "#" = filled well.
+  var PATTERNS = [
+    ['............', '..###...###.', '.#...#.#....', '.#...#.#....', '.#####..##..', '.#...#....#.', '.#...#.###..', '............'],
+    ['............', '.#...#..###.', '.#...#...#..', '.#...#...#..', '.#####...#..', '.#...#...#..', '.#...#..###.', '............'],
+    ['............', '..........#.', '.........#..', '........#...', '.#.....#....', '..#...#.....', '...#.#......', '....#.......']
   ];
   var plate = $('plate'), wells = [];
   plate.appendChild(el('span', 'lab'));
@@ -53,17 +48,29 @@
     for (var k = 0; k < 12; k++) {
       var w = el('span', 'well');
       w.dataset.c = k; w.dataset.r = r;
-      w.dataset.on = ART[r][k] === '#' ? '1' : '';
+      w.style.setProperty('--c', k); w.style.setProperty('--r', r);
       plate.appendChild(w); wells.push(w);
     }
   }
-  function fill() {
+  plate.appendChild(el('span', 'scan'));
+  var pat = 0, cycleT;
+  function show(n, first) {
+    pat = n;
     wells.forEach(function (w) {
-      if (!w.dataset.on) return;
-      if (reduce) { w.classList.add('on'); return; }
+      var want = PATTERNS[n][+w.dataset.r][+w.dataset.c] === '#';
+      if (want === w.classList.contains('on')) return;
+      if (reduce) { w.classList.toggle('on', want); return; }
       // pipette across the plate column by column, like a multichannel
-      setTimeout(function () { w.classList.add('on'); }, 500 + (+w.dataset.c) * 90 + (+w.dataset.r) * 18);
+      setTimeout(function () { w.classList.toggle('on', want); if (want) splash(w); }, (first ? 500 : 0) + (+w.dataset.c) * 70 + (+w.dataset.r) * 16);
     });
+  }
+  function splash(w) { w.classList.remove('pop'); void w.offsetWidth; w.classList.add('pop'); }
+  function fill() {
+    show(0, true);
+    if (reduce) return;
+    var hold = [5200, 3200, 3200];
+    var next = function () { cycleT = setTimeout(function () { show((pat + 1) % PATTERNS.length); next(); }, hold[pat]); };
+    next();
   }
   function drop(w) {
     if (w.classList.contains('drop')) return;
@@ -72,6 +79,7 @@
   }
   plate.addEventListener('pointerover', function (e) { if (e.target.classList.contains('well')) drop(e.target); });
   plate.addEventListener('pointerdown', function (e) { if (e.target.classList.contains('well')) drop(e.target); });
+  window.PLATE = { wells: wells, el: plate };
 
   /* ---------- gantt ---------- */
   var exp = S.experience.slice();
@@ -147,7 +155,7 @@
   var seal = '<svg viewBox="0 0 20 20" fill="none" stroke="#5A3FC8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 10.5l3.2 3.2L15 7"/></svg>';
   S.certifications.slice().sort(function (a, b) { return idx(b.date) - idx(a.date); }).forEach(function (c) {
     var li = el('li', 'cert');
-    li.innerHTML = '<span class="seal">' + seal + '</span><div><b>' + esc(c.name) + '</b><span>' + esc(c.issuer) + ', ' + fmt(c.date) + '</span></div>';
+    li.innerHTML = '<span class="seal">' + seal + '</span><div><b>' + esc(c.name) + '</b><span>' + 'Issued ' + fmt(c.date) + '</span></div>';
     cl.appendChild(li);
   });
 

@@ -60,7 +60,7 @@ p { margin: 0; }
   padding: clamp(40px, 8vh, 96px) var(--gutter) clamp(56px, 10vh, 120px);
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(32px, 5vw, 80px); align-items: center;
 }
-.name { font-size: clamp(52px, 8.4vw, 118px); line-height: .98; letter-spacing: -0.025em; font-weight: 500; }
+.name { font-size: clamp(50px, 7.3vw, 106px); line-height: .98; letter-spacing: -0.025em; font-weight: 500; }
 .name span { display: block; }
 .lede { margin-top: 28px; font-size: clamp(18px, 1.5vw, 21px); line-height: 1.55; color: var(--ink-2); max-width: 34em; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
@@ -215,3 +215,101 @@ p { margin: 0; }
 .g-bar.tight { color: transparent; }
 .g-out { position: absolute; top: 50%; transform: translateY(-50%); font-size: 14px; font-weight: 500; color: var(--ink); white-space: nowrap; }
 .g-out:empty { display: none; }
+
+/* =============== motion layer =============== */
+#bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.top { z-index: 20; }
+main, .foot { position: relative; z-index: 1; }
+
+.progress { position: fixed; left: 0; right: 0; top: 0; height: 3px; z-index: 30; background: linear-gradient(90deg, var(--violet), var(--amber)); transform-origin: 0 50%; transform: scaleX(0); pointer-events: none; }
+
+/* cursor: a pipette tip ring that trails the pointer */
+.cursor { position: fixed; left: 0; top: 0; z-index: 40; pointer-events: none; opacity: 0; transition: opacity .3s; }
+.cursor i { position: absolute; left: -17px; top: -17px; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--violet); transition: transform .35s cubic-bezier(.3,1.4,.5,1), background .3s, border-color .3s; }
+.cursor i::after { content: ''; position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px; border-radius: 50%; background: var(--violet); transition: opacity .2s; }
+.cursor.hot i { transform: scale(1.7); background: rgba(90,63,200,.1); }
+.cursor.on-well i { transform: scale(.75); border-color: var(--amber); background: rgba(242,196,61,.25); }
+.cursor.on-well i::after { background: var(--amber); }
+.cursor.press i { transform: scale(.6); }
+html:not(.has-cursor) .cursor { display: none; }
+
+/* name: letters rise out of a mask */
+.js .name .line { white-space: nowrap; opacity: 1; transform: none; overflow: hidden; padding-bottom: .16em; margin-bottom: -.16em; }
+.js .name .ch { display: inline-block; opacity: 1; transform: translateY(108%) rotate(4deg); transition: transform 1s cubic-bezier(.2,.8,.2,1); }
+.js.ready .name .ch { transform: none; }
+
+/* plate: 3D tilt, proximity glow, reader scan, splash */
+.plate-wrap { perspective: 1100px; }
+.plate { transform-style: preserve-3d; will-change: transform; overflow: hidden; }
+.well { --h: 0; position: relative; background: color-mix(in srgb, var(--amber) calc(var(--h) * 80%), var(--well-empty)); }
+.well.on { background: color-mix(in srgb, #9C87F5 calc(var(--h) * 90%), var(--violet)); }
+.well::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; opacity: 0; box-shadow: 0 0 0 0 rgba(90,63,200,.5); }
+.well.pop::after { animation: pop .7s ease-out; }
+@keyframes pop { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(90,63,200,.55); } 100% { opacity: 0; box-shadow: 0 0 0 12px rgba(90,63,200,0); } }
+.well.pop { animation: wobble .6s cubic-bezier(.3,1.6,.5,1); }
+@keyframes wobble { 0% { transform: scale(.55); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+.scan { position: absolute; top: 0; bottom: 0; left: 0; width: 70px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(242,196,61,.0) 20%, rgba(242,196,61,.28) 50%, transparent 80%);
+  mix-blend-mode: multiply; animation: scan 7s cubic-bezier(.45,0,.55,1) 2.6s infinite; transform: translateX(-100px); }
+@keyframes scan { 0% { transform: translateX(-100px); } 40%, 100% { transform: translateX(calc(min(46vw, 620px) + 40px)); } }
+
+/* heading mask wipe + staggered reveals */
+.mask { display: block; overflow: hidden; padding-bottom: .12em; margin-bottom: -.12em; }
+.mask .inner { display: inline-block; }
+.js .rv .mask .inner { transform: translateY(105%); transition: transform 1s cubic-bezier(.2,.8,.2,1); }
+.js .rv.in .mask .inner { transform: none; }
+.js .rv:not(h2) { opacity: 0; transform: translateY(26px); transition: opacity .8s ease var(--d, 0s), transform .9s cubic-bezier(.2,.8,.2,1) var(--d, 0s); }
+.js .rv.in:not(h2) { opacity: 1; transform: none; }
+.js .contact .hero-actions.rv { opacity: 0; }
+.js .contact .hero-actions.rv.in { opacity: 1; }
+
+/* strength dots fill like wells */
+.strength .dot { transform: scale(.2); transition: transform .9s cubic-bezier(.3,1.6,.5,1) calc(var(--d, 0s) + .25s); }
+.strength.in .dot, .still .strength .dot { transform: none; }
+
+/* certificate check draws itself */
+.cert .seal path { stroke-dasharray: 16; stroke-dashoffset: 16; transition: stroke-dashoffset .6s ease calc(var(--d, 0s) + .35s); }
+.cert.in .seal path, .still .cert .seal path { stroke-dashoffset: 0; }
+.cert { transition: border-color .25s, box-shadow .25s, opacity .8s ease var(--d, 0s), transform .9s cubic-bezier(.2,.8,.2,1) var(--d, 0s); }
+.cert:hover { border-color: var(--violet); box-shadow: 0 14px 30px -18px rgba(90,63,200,.45); }
+
+/* gantt bars: shimmer once they land */
+.g-bar::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.22) 50%, transparent 70%); transform: translateX(-100%); }
+.gantt.in .g-bar::after { animation: shimmer 1.4s ease 1.1s; }
+@keyframes shimmer { to { transform: translateX(100%); } }
+
+/* ---------- How I work ---------- */
+.flow { position: relative; max-width: none; padding: clamp(64px, 10vh, 120px) 0 0; }
+.flow-sticky { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.flow.pinned .flow-sticky { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; justify-content: center; max-width: none; padding-left: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); padding-right: 0; overflow: hidden; }
+.flow.pinned .flow-head { max-width: calc(var(--max) - 2 * var(--gutter)); padding-right: var(--gutter); }
+.flow-track-wrap { position: relative; }
+.flow-line { position: relative; height: 2px; background: var(--hair); margin: 8px 0 34px; max-width: calc(var(--max) - 2 * var(--gutter)); }
+.flow-line i { position: absolute; inset: 0; background: linear-gradient(90deg, var(--violet), var(--amber)); transform-origin: 0 50%; transform: scaleX(0); }
+.flow-line b { position: absolute; top: 50%; left: 0; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50% 50% 50% 0; background: var(--violet); transform: rotate(-45deg); box-shadow: 0 6px 14px -4px rgba(90,63,200,.6); }
+.flow-track { list-style: none; margin: 0; padding: 0; display: flex; gap: 20px; will-change: transform; }
+.flow.pinned .flow-track { padding-right: var(--gutter); }
+.step { flex: 0 0 clamp(280px, 30vw, 380px); background: var(--paper); border: 1px solid var(--hair); border-radius: 20px; padding: 28px 28px 32px; position: relative; transition: border-color .4s, transform .5s cubic-bezier(.2,.8,.2,1), box-shadow .4s; }
+.step-n { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--well-empty); box-shadow: inset 0 2px 3px rgba(21,35,59,.14); font: 600 16px/1 var(--sans); color: var(--ink-2); transition: background .5s, color .5s; }
+.step h3 { font-size: 26px; line-height: 1.2; margin-top: 26px; }
+.step p { margin-top: 12px; color: var(--ink-2); }
+.step.lit { border-color: rgba(90,63,200,.45); box-shadow: 0 24px 50px -30px rgba(90,63,200,.5); transform: translateY(-6px); }
+.step.lit .step-n { background: var(--violet); color: #fff; }
+@media (max-width: 900px) {
+  .flow-track { flex-direction: column; }
+  .step { flex: none; }
+  .flow-line { display: none; }
+}
+
+/* ---------- contact grid ---------- */
+.contact { position: relative; overflow: hidden; }
+.contact-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.contact > :not(canvas) { position: relative; }
+.contact h2 .mask .inner { color: #fff; }
+
+.btn { will-change: transform; transition: background .2s, color .2s, border-color .2s, transform .35s cubic-bezier(.3,1.4,.5,1); }
+
+@media (prefers-reduced-motion: reduce) {
+  #bg, .cursor, .scan, .contact-fx, .progress { display: none; }
+  .js .name .ch, .js .rv .mask .inner, .js .rv:not(h2) { transform: none !important; opacity: 1 !important; transition: none !important; }
+}
