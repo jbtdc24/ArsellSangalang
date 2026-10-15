@@ -1,4 +1,4 @@
-/* Motion layer: background network, cursor, plate tilt, reveals, process track, contact grid. */
+/* Motion layer: background network, cursor, hero card tilt, reveals, process track, contact grid. */
 (function () {
   'use strict';
   var S = window.SITE;
@@ -59,7 +59,7 @@
 
   if (reduce) { document.documentElement.classList.add('still'); return; }
 
-  /* ---------- background: molecular network ---------- */
+  /* ---------- background: connection network ---------- */
   var bg = $('bg'), g = bg.getContext('2d'), W, H, nodes = [];
   var COLS = ['rgba(125,136,153,', 'rgba(125,136,153,', 'rgba(90,63,200,', 'rgba(242,196,61,'];
   function sizeBg() {
@@ -107,9 +107,8 @@
   if (fine) {
     document.documentElement.classList.add('has-cursor');
     document.addEventListener('pointerover', function (e) {
-      var hot = e.target.closest && e.target.closest('a, button, .well, .step');
+      var hot = e.target.closest && e.target.closest('a, button, .deal, .step');
       cur.classList.toggle('hot', !!hot);
-      cur.classList.toggle('on-well', !!(e.target.classList && e.target.classList.contains('well')));
     });
     document.addEventListener('pointerdown', function () { cur.classList.add('press'); });
     document.addEventListener('pointerup', function () { cur.classList.remove('press'); });
@@ -125,30 +124,17 @@
     b.addEventListener('pointerleave', function () { b.style.transform = ''; });
   });
 
-  /* ---------- plate: tilt + proximity glow ---------- */
-  var P = window.PLATE, plate = P.el, hero = document.querySelector('.hero');
-  var tilt = { x: 0, y: 0, tx: 0, ty: 0 }, centers = [];
-  function measure() {
-    centers = P.wells.map(function (w) { var r = w.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2 + scrollY, r.width]; });
-  }
+  /* ---------- hero card: tilt toward the cursor ---------- */
+  var plate = window.PLATE.el, hero = document.querySelector('.hero');
+  var tilt = { x: 0, y: 0, tx: 0, ty: 0 };
+  function measure() {}
   hero.addEventListener('pointermove', function (e) {
     var r = plate.getBoundingClientRect();
-    tilt.ty = clamp((e.clientX - (r.left + r.width / 2)) / r.width, -1, 1) * 9;
-    tilt.tx = clamp(-(e.clientY - (r.top + r.height / 2)) / r.height, -1, 1) * 7;
+    tilt.ty = clamp((e.clientX - (r.left + r.width / 2)) / r.width, -1, 1) * 8;
+    tilt.tx = clamp(-(e.clientY - (r.top + r.height / 2)) / r.height, -1, 1) * 6;
   });
   hero.addEventListener('pointerleave', function () { tilt.tx = tilt.ty = 0; });
-  var glowOn = false;
-  function glow() {
-    if (!fine || !centers.length) return;
-    var near = mouse.y + scrollY, any = false;
-    for (var i = 0; i < P.wells.length; i++) {
-      var c = centers[i], dx = mouse.x - c[0], dy = near - c[1], d = Math.sqrt(dx * dx + dy * dy);
-      var h = clamp(1 - d / (c[2] * 2.6), 0, 1);
-      if (h > 0) any = true;
-      if (h > 0 || glowOn) P.wells[i].style.setProperty('--h', h.toFixed(2));
-    }
-    glowOn = any;
-  }
+  function glow() {}
 
   /* ---------- process track (pinned horizontal scroll) ---------- */
   var flow = $('process'), fill = $('flow-fill'), dropEl = $('flow-drop');
@@ -172,7 +158,7 @@
     steps.forEach(function (s, i) { s.classList.toggle('lit', i <= k && p > 0.02); });
   }
 
-  /* ---------- contact: glowing well grid ---------- */
+  /* ---------- contact: glowing dot grid ---------- */
   var cf = $('contact-fx'), cg = cf.getContext('2d'), contact = cf.parentElement, cW, cH, cOn = false;
   function sizeContact() { cW = contact.clientWidth; cH = contact.clientHeight; cf.width = cW * DPR; cf.height = cH * DPR; cg.setTransform(DPR, 0, 0, DPR, 0, 0); }
   function drawContact(t) {

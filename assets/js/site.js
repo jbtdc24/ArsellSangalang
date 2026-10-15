@@ -34,52 +34,61 @@
   }
 
   /* ---------- 96-well plate ---------- */
-  // Patterns the plate cycles through. "#" = filled well.
-  var PATTERNS = [
-    ['............', '..###...###.', '.#...#.#....', '.#...#.#....', '.#####..##..', '.#...#....#.', '.#...#.###..', '............'],
-    ['............', '.#...#..###.', '.#...#...#..', '.#...#...#..', '.#####...#..', '.#...#...#..', '.#...#..###.', '............'],
-    ['............', '..........#.', '.........#..', '........#...', '.#.....#....', '..#...#.....', '...#.#......', '....#.......']
-  ];
-  var plate = $('plate'), wells = [];
-  plate.appendChild(el('span', 'lab'));
-  for (var c = 1; c <= 12; c++) plate.appendChild(el('span', 'lab col', c));
-  for (var r = 0; r < 8; r++) {
-    plate.appendChild(el('span', 'lab row', 'ABCDEFGH'[r]));
-    for (var k = 0; k < 12; k++) {
-      var w = el('span', 'well');
-      w.dataset.c = k; w.dataset.r = r;
-      w.style.setProperty('--c', k); w.style.setProperty('--r', r);
-      plate.appendChild(w); wells.push(w);
-    }
+  // ---------- role line ----------
+  var roleEl = $('role-text'), ri = 0;
+  roleEl.textContent = S.roles[0];
+  function rotateRole() {
+    if (reduce || S.roles.length < 2) return;
+    setInterval(function () {
+      roleEl.classList.add('out');
+      setTimeout(function () { ri = (ri + 1) % S.roles.length; roleEl.textContent = S.roles[ri]; roleEl.classList.remove('out'); }, 450);
+    }, 3600);
   }
-  plate.appendChild(el('span', 'scan'));
-  var pat = 0, cycleT;
-  function show(n, first) {
-    pat = n;
-    wells.forEach(function (w) {
-      var want = PATTERNS[n][+w.dataset.r][+w.dataset.c] === '#';
-      if (want === w.classList.contains('on')) return;
-      if (reduce) { w.classList.toggle('on', want); return; }
-      // pipette across the plate column by column, like a multichannel
-      setTimeout(function () { w.classList.toggle('on', want); if (want) splash(w); }, (first ? 500 : 0) + (+w.dataset.c) * 70 + (+w.dataset.r) * 16);
-    });
+
+  // ---------- hero: live outreach card ----------
+  var deal = $('deal'), thread = $('d-thread'), result = $('d-result'), stagesEl = $('stages');
+  S.stages.forEach(function (t) { stagesEl.appendChild(el('li', '', '<i></i><span>' + esc(t) + '</span>')); });
+  var stageLis = [].slice.call(stagesEl.children);
+  var timers = [], scene = -1;
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+  function stage(n) { stageLis.forEach(function (li, i) { li.classList.toggle('done', i < n); li.classList.toggle('now', i === n); }); }
+  function bubble(kind, text, typeMs) {
+    var b = el('div', 'msg ' + kind);
+    b.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+    thread.appendChild(b);
+    requestAnimationFrame(function () { b.classList.add('show'); });
+    later(function () { b.classList.add('typed'); b.innerHTML = '<span class="txt">' + esc(text) + '</span>'; }, typeMs);
   }
-  function splash(w) { w.classList.remove('pop'); void w.offsetWidth; w.classList.add('pop'); }
-  function fill() {
-    show(0, true);
-    if (reduce) return;
-    var hold = [5200, 3200, 3200];
-    var next = function () { cycleT = setTimeout(function () { show((pat + 1) % PATTERNS.length); next(); }, hold[pat]); };
-    next();
+  function play(n) {
+    timers.forEach(clearTimeout); timers = [];
+    scene = n % S.scenes.length;
+    var sc = S.scenes[scene];
+    deal.classList.add('swap');
+    later(function () {
+      deal.classList.remove('swap');
+      thread.innerHTML = ''; result.classList.remove('show');
+      $('d-av').textContent = sc.initials; $('d-name').textContent = sc.who; $('d-title').textContent = sc.title; $('d-tag').textContent = sc.tag;
+      $('d-res').textContent = sc.result; $('d-det').textContent = sc.detail;
+      var outFirst = sc.first !== 'in';
+      var a1 = outFirst ? ['out', sc.out] : ['in', sc.in], a2 = outFirst ? ['in', sc.in] : ['out', sc.out];
+      if (reduce) {
+        [a1, a2].forEach(function (m) { var b = el('div', 'msg show typed ' + m[0], '<span class="txt">' + esc(m[1]) + '</span>'); thread.appendChild(b); });
+        result.classList.add('show'); stage(4); return;
+      }
+      stage(outFirst ? 0 : 1);
+      later(function () { bubble(a1[0], a1[1], 1300); stage(1); }, 500);
+      later(function () { bubble(a2[0], a2[1], 1100); stage(2); }, 3300);
+      later(function () { result.classList.add('show'); stage(4); }, 5600);
+      later(function () { play(scene + 1); }, 9800);
+    }, n === 0 ? 0 : 380);
   }
-  function drop(w) {
-    if (w.classList.contains('drop')) return;
-    w.classList.add('drop');
-    setTimeout(function () { w.classList.remove('drop'); }, 420);
-  }
-  plate.addEventListener('pointerover', function (e) { if (e.target.classList.contains('well')) drop(e.target); });
-  plate.addEventListener('pointerdown', function (e) { if (e.target.classList.contains('well')) drop(e.target); });
-  window.PLATE = { wells: wells, el: plate };
+  deal.addEventListener('click', function () { play(scene + 1); });
+  deal.setAttribute('role', 'button'); deal.tabIndex = 0;
+  deal.setAttribute('aria-label', 'Show the next example conversation');
+  deal.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); play(scene + 1); } });
+  if (window.matchMedia('(hover: none)').matches) document.querySelector('.deal-cap').textContent = 'Example conversations. Tap the card to see the next one.';
+  function fill() { play(0); rotateRole(); }
+  window.PLATE = { el: deal };
 
   /* ---------- gantt ---------- */
   var exp = S.experience.slice();
