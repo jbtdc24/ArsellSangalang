@@ -161,7 +161,7 @@
 
   /* ---------- certifications ---------- */
   var cl = $('cert-list');
-  var seal = '<svg viewBox="0 0 20 20" fill="none" stroke="#5A3FC8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 10.5l3.2 3.2L15 7"/></svg>';
+  var seal = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 10.5l3.2 3.2L15 7"/></svg>';
   S.certifications.slice().sort(function (a, b) { return idx(b.date) - idx(a.date); }).forEach(function (c) {
     var li = el('li', 'cert');
     li.innerHTML = '<span class="seal">' + seal + '</span><div><b>' + esc(c.name) + '</b><span>' + 'Issued ' + fmt(c.date) + '</span></div>';

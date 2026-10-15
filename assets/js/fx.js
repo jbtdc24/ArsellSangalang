@@ -1,4 +1,4 @@
-/* Motion layer: background network, cursor, hero card tilt, reveals, process track, contact grid. */
+/* Motion layer: cursor, hero card tilt, reveals, process track, contact grid. */
 (function () {
   'use strict';
   var S = window.SITE;
@@ -58,49 +58,6 @@
   } else [].forEach.call(rvs, function (e) { e.classList.add('in'); });
 
   if (reduce) { document.documentElement.classList.add('still'); return; }
-
-  /* ---------- background: connection network ---------- */
-  var bg = $('bg'), g = bg.getContext('2d'), W, H, nodes = [];
-  var COLS = ['rgba(125,136,153,', 'rgba(125,136,153,', 'rgba(90,63,200,', 'rgba(242,196,61,'];
-  function sizeBg() {
-    W = innerWidth; H = innerHeight;
-    bg.width = W * DPR; bg.height = H * DPR; bg.style.width = W + 'px'; bg.style.height = H + 'px';
-    g.setTransform(DPR, 0, 0, DPR, 0, 0);
-    var want = Math.min(90, Math.round(W * H / 20000));
-    while (nodes.length < want) nodes.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25, r: 1.4 + Math.random() * 2.4, c: COLS[(Math.random() * COLS.length) | 0], p: Math.random() * 6.28 });
-    nodes.length = want;
-  }
-  sizeBg();
-  var scrollFade = 1;
-  function drawBg(t) {
-    g.clearRect(0, 0, W, H);
-    var LINK = Math.min(150, W / 8), L2 = LINK * LINK;
-    for (var i = 0; i < nodes.length; i++) {
-      var a = nodes[i];
-      a.x += a.vx; a.y += a.vy;
-      // the cursor gently pulls nearby molecules in
-      var dx = mouse.x - a.x, dy = mouse.y - a.y, d2 = dx * dx + dy * dy;
-      if (d2 < 220 * 220 && d2 > 400) { var f = 0.012 * (1 - Math.sqrt(d2) / 220); a.x += dx * f; a.y += dy * f; }
-      if (a.x < -20) a.x = W + 20; if (a.x > W + 20) a.x = -20;
-      if (a.y < -20) a.y = H + 20; if (a.y > H + 20) a.y = -20;
-    }
-    g.lineWidth = 1;
-    for (i = 0; i < nodes.length; i++) {
-      a = nodes[i];
-      for (var j = i + 1; j < nodes.length; j++) {
-        var b = nodes[j]; dx = a.x - b.x; dy = a.y - b.y; d2 = dx * dx + dy * dy;
-        if (d2 < L2) { g.strokeStyle = 'rgba(21,35,59,' + (0.13 * (1 - d2 / L2) * scrollFade).toFixed(3) + ')'; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); }
-      }
-      dx = mouse.x - a.x; dy = mouse.y - a.y; d2 = dx * dx + dy * dy;
-      if (d2 < 200 * 200) { g.strokeStyle = 'rgba(90,63,200,' + (0.35 * (1 - d2 / 40000)).toFixed(3) + ')'; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(mouse.x, mouse.y); g.stroke(); }
-    }
-    for (i = 0; i < nodes.length; i++) {
-      a = nodes[i];
-      var pulse = 0.55 + 0.3 * Math.sin(t / 900 + a.p);
-      g.fillStyle = a.c + (pulse * scrollFade).toFixed(3) + ')';
-      g.beginPath(); g.arc(a.x, a.y, a.r, 0, 6.283); g.fill();
-    }
-  }
 
   /* ---------- cursor ---------- */
   var cur = $('cursor');
@@ -169,7 +126,7 @@
       var wave = 0.5 + 0.5 * Math.sin(x * 0.012 + y * 0.008 - t / 700);
       var d = Math.hypot(mx - x, my - y), h = clamp(1 - d / 170, 0, 1);
       var a = 0.05 + wave * 0.05 + h * 0.5;
-      cg.fillStyle = h > 0.02 ? 'rgba(' + Math.round(lerp(90, 242, h)) + ',' + Math.round(lerp(63, 196, h)) + ',' + Math.round(lerp(200, 61, h)) + ',' + a.toFixed(3) + ')' : 'rgba(255,255,255,' + a.toFixed(3) + ')';
+      cg.fillStyle = h > 0.02 ? 'rgba(' + Math.round(lerp(212, 120, h)) + ',' + Math.round(lerp(146, 66, h)) + ',' + Math.round(lerp(74, 30, h)) + ',' + (a + 0.1).toFixed(3) + ')' : 'rgba(42,28,21,' + a.toFixed(3) + ')';
       cg.beginPath(); cg.arc(x, y, rad * (1 + h * 0.5), 0, 6.283); cg.fill();
     }
   }
@@ -180,10 +137,9 @@
   function onScroll() {
     var max = document.documentElement.scrollHeight - innerHeight;
     prog.style.transform = 'scaleX(' + (max > 0 ? scrollY / max : 0).toFixed(4) + ')';
-    scrollFade = clamp(1 - scrollY / (innerHeight * 3), 0.45, 1);
     updFlow();
   }
-  function onResize() { sizeBg(); sizeFlow(); sizeContact(); measure(); onScroll(); }
+  function onResize() { sizeFlow(); sizeContact(); measure(); onScroll(); }
   window.addEventListener('scroll', onScroll, { passive: true });
   var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(onResize, 120); });
   onResize();
@@ -195,7 +151,6 @@
   new IntersectionObserver(function (es) { heroOn = es[0].isIntersecting; }).observe(hero);
   function loop(t) {
     if (!document.hidden) {
-      drawBg(t);
       if (fine) {
         mouse.sx = lerp(mouse.sx < -999 ? mouse.x : mouse.sx, mouse.x, 0.2);
         mouse.sy = lerp(mouse.sy < -999 ? mouse.y : mouse.sy, mouse.y, 0.2);

@@ -10,14 +10,18 @@
 <meta property="og:type" content="website">
 <meta property="og:image" content="/assets/img/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#EEF1F4">
+<meta name="theme-color" content="#1B1310">
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/Lora-Variable.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=3">
+<link rel="stylesheet" href="/assets/css/style.css?v=4">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<canvas id="bg" aria-hidden="true"></canvas>
+<div class="stains" aria-hidden="true">
+  <svg class="s1" viewBox="0 0 200 200"><defs><filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="9"/></filter></defs>
+    <g filter="url(#rough)" fill="none" stroke="currentColor"><circle cx="100" cy="100" r="78" stroke-width="7" stroke-opacity=".9"/><circle cx="100" cy="100" r="74" stroke-width="2" stroke-opacity=".5"/><path d="M40 60 A78 78 0 0 1 150 40" stroke-width="11" stroke-opacity=".6"/></g></svg>
+  <svg class="s2" viewBox="0 0 200 200"><g filter="url(#rough)" fill="none" stroke="currentColor"><circle cx="100" cy="100" r="80" stroke-width="5"/><path d="M170 120 A80 80 0 0 1 70 176" stroke-width="10" stroke-opacity=".6"/></g></svg>
+</div>
 <div class="cursor" id="cursor" aria-hidden="true"><i></i></div>
 <div class="progress" id="progress" aria-hidden="true"></div>
 
@@ -115,8 +119,8 @@
   <a href="#top">Back to top</a>
 </footer>
 
-<script src="/assets/js/data.js?v=3"></script>
-<script src="/assets/js/site.js?v=3"></script>
-<script src="/assets/js/fx.js?v=3"></script>
+<script src="/assets/js/data.js?v=4"></script>
+<script src="/assets/js/site.js?v=4"></script>
+<script src="/assets/js/fx.js?v=4"></script>
 </body>
 </html>
